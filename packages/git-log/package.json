@@ -1,0 +1,28 @@
+{
+  "name": "git-log",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "gglog": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "prepare": "npm run build",
+    "debug": "ts-node src/index.ts --path ./ --output ./debug-output.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^20.10.5",
+    "commander": "^11.1.0",
+    "simple-git": "^3.21.0",
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "ts-node": "^10.9.2"
+  }
+}
