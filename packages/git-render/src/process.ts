@@ -1,3 +1,4 @@
+import { lineColors } from "./color";
 import type { CommitViewModel, GitCommit, Swimlane } from "./interface";
 
 export function deepClone<T>(obj: T): T {
@@ -14,7 +15,9 @@ export function deepClone<T>(obj: T): T {
   return result;
 }
 
-const TEMP_COLOR = "#bdeefe";
+export function rot(index: number, modulo: number): number {
+  return (modulo + (index % modulo)) % modulo;
+}
 
 /**
  *
@@ -23,6 +26,7 @@ const TEMP_COLOR = "#bdeefe";
  */
 export const processGitCommits = (commits: GitCommit[]): CommitViewModel[] => {
   const viewModels: CommitViewModel[] = [];
+  let colorIndex = -1;
 
   for (let i = 0, len = commits.length; i < len; i++) {
     const commit = commits[i];
@@ -55,7 +59,7 @@ export const processGitCommits = (commits: GitCommit[]): CommitViewModel[] => {
           if (!firstParentAdded) {
             outputSwimlanes.push({
               id: commit.parentHashes[0],
-              color: TEMP_COLOR,
+              color: node.color,
             });
             firstParentAdded = true;
           }
@@ -72,19 +76,12 @@ export const processGitCommits = (commits: GitCommit[]): CommitViewModel[] => {
         i < commit.parentHashes.length;
         i++
       ) {
-        // Color index (label -> next color)
-        let colorIdentifier: string | undefined;
-
-        // 如果不是第一个 parent 设置 colorIdentifier
-        if (i === 0) {
-          colorIdentifier = TEMP_COLOR;
-        } else {
-          // TODO: 实现颜色计算逻辑
-        }
+        colorIndex = rot(colorIndex + 1, lineColors.length);
+        const colorIdentifier = lineColors[colorIndex];
 
         outputSwimlanes.push({
           id: commit.parentHashes[i],
-          color: TEMP_COLOR,
+          color: colorIdentifier,
         });
       }
     }

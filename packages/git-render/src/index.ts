@@ -1,7 +1,7 @@
 import './index.css';
 import { renderViewModel } from './render'
 import { processGitCommits } from './process'
-import commits from './commits/commits.json'
+import commits from './commits/merge.json'
 
 const svgs = processGitCommits(commits).map(viewModel => renderViewModel(viewModel))
 

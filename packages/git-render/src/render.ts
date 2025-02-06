@@ -6,7 +6,7 @@ const SWIMLANE_CURVE_RADIUS = 5;
 const CIRCLE_RADIUS = 4;
 const CIRCLE_STROKE_WIDTH = 2;
 
-const __TEMP_CIRCLE_COLOR = "#eefebd";
+const __TEMP_CIRCLE_COLOR = "#fff";
 
 export function asCssVariable(color: string): string {
   return color;
@@ -76,6 +76,9 @@ export const renderViewModel = (viewModel: CommitViewModel): SVGSVGElement => {
   // Circle index - use the input swimlane index if present, otherwise add it to the end
   /** ??: 使用输入泳道索引（如果存在），否则将其添加到末尾 */
   const circleIndex = inputIndex !== -1 ? inputIndex : inputSwimlanes.length;
+
+  const circleColor = circleIndex < outputSwimlanes.length ? outputSwimlanes[circleIndex].color :
+		circleIndex < inputSwimlanes.length ? inputSwimlanes[circleIndex].color : __TEMP_CIRCLE_COLOR;
 
   let outputSwimlaneIndex = 0;
 
@@ -211,14 +214,14 @@ export const renderViewModel = (viewModel: CommitViewModel): SVGSVGElement => {
       SWIMLANE_WIDTH * (circleIndex + 1),
       SWIMLANE_HEIGHT / 2,
       SWIMLANE_HEIGHT,
-      '#bdeefe'
+      circleColor
     );
     svg.append(path);
   }
 
   if (false) {
     // HEAD
-    const outerCircle = drawCircle(circleIndex, CIRCLE_RADIUS + 3, CIRCLE_STROKE_WIDTH, __TEMP_CIRCLE_COLOR);
+    const outerCircle = drawCircle(circleIndex, CIRCLE_RADIUS + 3, CIRCLE_STROKE_WIDTH, circleColor);
     svg.append(outerCircle);
 
     const innerCircle = drawCircle(circleIndex, CIRCLE_STROKE_WIDTH, CIRCLE_RADIUS);
@@ -226,14 +229,14 @@ export const renderViewModel = (viewModel: CommitViewModel): SVGSVGElement => {
 } else {
     if (historyItem.parentHashes.length > 1) {
         // Multi-parent node
-        const circleOuter = drawCircle(circleIndex, CIRCLE_RADIUS + 2, CIRCLE_STROKE_WIDTH, __TEMP_CIRCLE_COLOR);
+        const circleOuter = drawCircle(circleIndex, CIRCLE_RADIUS + 2, CIRCLE_STROKE_WIDTH, circleColor);
         svg.append(circleOuter);
 
-        const circleInner = drawCircle(circleIndex, CIRCLE_RADIUS - 1, CIRCLE_STROKE_WIDTH, __TEMP_CIRCLE_COLOR);
+        const circleInner = drawCircle(circleIndex, CIRCLE_RADIUS - 1, CIRCLE_STROKE_WIDTH, circleColor);
         svg.append(circleInner);
     } else {
         // Node
-        const circle = drawCircle(circleIndex, CIRCLE_RADIUS + 1, CIRCLE_STROKE_WIDTH, __TEMP_CIRCLE_COLOR);
+        const circle = drawCircle(circleIndex, CIRCLE_RADIUS + 1, CIRCLE_STROKE_WIDTH, circleColor);
         svg.append(circle);
     }
 }
