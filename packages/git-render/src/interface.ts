@@ -8,7 +8,6 @@ export interface GitCommit {
   committerEmail: string;
   commitDate: string;
   subject: string;
-  body: string;
 }
 
 export interface CommitViewModel {
