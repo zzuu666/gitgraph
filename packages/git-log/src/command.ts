@@ -1,8 +1,8 @@
 import simpleGit, { type SimpleGit } from "simple-git";
 
 interface CommitInfo {
-  hash: string;
-  parentHashes: string[];
+  id: string;
+  parentIds: string[];
   author: string;
   authorEmail: string;
   authorDate: string;
@@ -33,6 +33,7 @@ export async function getGitLog(repoPath: string): Promise<CommitInfo[]> {
 
   const logOutput = await git.raw([
     "log",
+    "--branches",
     "--topo-order",
     "--max-count=100",
     `--format=${format}`,
@@ -54,8 +55,8 @@ function parseGitLog(logOutput: string): CommitInfo[] {
     }
 
     const [
-      hash,
-      parentHashes,
+      id,
+      parentIds,
       author,
       authorEmail,
       authorDate,
@@ -66,8 +67,8 @@ function parseGitLog(logOutput: string): CommitInfo[] {
     ] = line;
 
     result.push({
-      hash,
-      parentHashes: parentHashes.split(" ").filter(Boolean),
+      id,
+      parentIds: parentIds.split(" ").filter(Boolean),
       author,
       authorEmail,
       authorDate,

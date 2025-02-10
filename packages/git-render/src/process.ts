@@ -1,5 +1,5 @@
 import { lineColors } from "./color";
-import type { CommitViewModel, GitCommit, Swimlane } from "./interface";
+import type { Swimlane, TopologyItem, TopologyViewModel } from "./interface";
 
 export function deepClone<T>(obj: T): T {
   if (!obj || typeof obj !== "object") {
@@ -24,12 +24,14 @@ export function rot(index: number, modulo: number): number {
  * @param commits output of `git log --topo-order`
  * @returns
  */
-export const processGitCommits = (commits: GitCommit[]): CommitViewModel[] => {
-  const viewModels: CommitViewModel[] = [];
+export const processGitCommits = (
+  commits: TopologyItem[]
+): TopologyViewModel[] => {
+  const viewModels: TopologyViewModel[] = [];
   let colorIndex = -1;
 
   for (let i = 0, len = commits.length; i < len; i++) {
-    const commit = commits[i];
+    const item = commits[i];
 
     const outputSwimlanesFromPreviousItem =
       viewModels.at(-1)?.outputSwimlanes ?? [];
@@ -52,13 +54,13 @@ export const processGitCommits = (commits: GitCommit[]): CommitViewModel[] => {
      *     | /
      *     *     c
      */
-    if (commit.parentHashes.length > 0) {
+    if (item.parentIds.length > 0) {
       for (const node of inputSwimlanes) {
         // 如果是相同的 commit 就绘制相同的颜色
-        if (node.id === commit.hash) {
+        if (node.id === item.id) {
           if (!firstParentAdded) {
             outputSwimlanes.push({
-              id: commit.parentHashes[0],
+              id: item.parentIds[0],
               color: node.color,
             });
             firstParentAdded = true;
@@ -71,23 +73,19 @@ export const processGitCommits = (commits: GitCommit[]): CommitViewModel[] => {
       }
 
       // Add unprocessed parent(s) to the output
-      for (
-        let i = firstParentAdded ? 1 : 0;
-        i < commit.parentHashes.length;
-        i++
-      ) {
+      for (let i = firstParentAdded ? 1 : 0; i < item.parentIds.length; i++) {
         colorIndex = rot(colorIndex + 1, lineColors.length);
         const colorIdentifier = lineColors[colorIndex];
 
         outputSwimlanes.push({
-          id: commit.parentHashes[i],
+          id: item.parentIds[i],
           color: colorIdentifier,
         });
       }
     }
 
     viewModels.push({
-      commit,
+      item,
       inputSwimlanes,
       outputSwimlanes,
     });

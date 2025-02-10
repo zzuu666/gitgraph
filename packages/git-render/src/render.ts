@@ -1,4 +1,4 @@
-import type { CommitViewModel, Swimlane } from "./interface";
+import type { Swimlane, TopologyViewModel } from "./interface";
 
 export const SWIMLANE_HEIGHT = 22;
 export const SWIMLANE_WIDTH = 11;
@@ -6,7 +6,7 @@ const SWIMLANE_CURVE_RADIUS = 5;
 const CIRCLE_RADIUS = 4;
 const CIRCLE_STROKE_WIDTH = 2;
 
-const __TEMP_CIRCLE_COLOR = "#fff";
+const UNKNOWN_CIRCLE_COLOR = "#fff";
 
 export function asCssVariable(color: string): string {
   return color;
@@ -44,52 +44,61 @@ function findLastIndex(nodes: Swimlane[], id: string): number {
   return -1;
 }
 
-function drawCircle(index: number, radius: number, strokeWidth: number, colorIdentifier?: string): SVGCircleElement {
-	const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	circle.setAttribute('cx', `${SWIMLANE_WIDTH * (index + 1)}`);
-	circle.setAttribute('cy', `${SWIMLANE_WIDTH}`);
-	circle.setAttribute('r', `${radius}`);
+function drawCircle(
+  index: number,
+  radius: number,
+  strokeWidth: number,
+  colorIdentifier?: string
+): SVGCircleElement {
+  const circle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
+  circle.setAttribute("cx", `${SWIMLANE_WIDTH * (index + 1)}`);
+  circle.setAttribute("cy", `${SWIMLANE_WIDTH}`);
+  circle.setAttribute("r", `${radius}`);
 
-	circle.style.strokeWidth = `${strokeWidth}px`;
-	if (colorIdentifier) {
-		circle.style.fill = asCssVariable(colorIdentifier);
-	}
+  circle.style.strokeWidth = `${strokeWidth}px`;
+  if (colorIdentifier) {
+    circle.style.fill = asCssVariable(colorIdentifier);
+  }
 
-	return circle;
+  return circle;
 }
 
-export const renderViewModel = (viewModel: CommitViewModel): SVGSVGElement => {
+export const renderViewModel = (
+  viewModel: TopologyViewModel,
+  isCurrent: boolean
+): SVGSVGElement => {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.classList.add("graph");
 
-  const historyItem = viewModel.commit;
-  /** ISCMHistoryItemGraphNode 应该是跟 Commit 关联的图的信息 */
+  const historyItem = viewModel.item;
   const inputSwimlanes = viewModel.inputSwimlanes;
   const outputSwimlanes = viewModel.outputSwimlanes;
 
   // Find the history item in the input swimlanes
-  /** 当前的这个 historyItem 有没有出现在  */
   const inputIndex = inputSwimlanes.findIndex(
-    (node) => node.id === historyItem.hash
+    (node) => node.id === historyItem.id
   );
 
   // Circle index - use the input swimlane index if present, otherwise add it to the end
-  /** ??: 使用输入泳道索引（如果存在），否则将其添加到末尾 */
   const circleIndex = inputIndex !== -1 ? inputIndex : inputSwimlanes.length;
 
-  const circleColor = circleIndex < outputSwimlanes.length ? outputSwimlanes[circleIndex].color :
-		circleIndex < inputSwimlanes.length ? inputSwimlanes[circleIndex].color : __TEMP_CIRCLE_COLOR;
+  const circleColor =
+    circleIndex < outputSwimlanes.length
+      ? outputSwimlanes[circleIndex].color
+      : circleIndex < inputSwimlanes.length
+      ? inputSwimlanes[circleIndex].color
+      : UNKNOWN_CIRCLE_COLOR;
 
   let outputSwimlaneIndex = 0;
 
-  /** 通过 inputSwimlanes 绘制与子 commit 的连线 */
   for (let index = 0; index < inputSwimlanes.length; index++) {
     const color = inputSwimlanes[index].color;
 
     // Current commit
-    /** 如果这个条件为 true 那么 inputIndex 必然 !== -1 那么 circleIndex 必然 === inputIndex  */
-    /** 难道 input 里面可能有多个 === historyItem ? */
-    if (inputSwimlanes[index].id === historyItem.hash) {
+    if (inputSwimlanes[index].id === historyItem.id) {
       // Base commit
       if (index !== circleIndex) {
         const d: string[] = [];
@@ -168,10 +177,10 @@ export const renderViewModel = (viewModel: CommitViewModel): SVGSVGElement => {
   }
 
   // Add remaining parent(s)
-  for (let i = 1; i < historyItem.parentHashes.length; i++) {
+  for (let i = 1; i < historyItem.parentIds.length; i++) {
     const parentOutputIndex = findLastIndex(
       outputSwimlanes,
-      historyItem.parentHashes[i]
+      historyItem.parentIds[i]
     );
     if (parentOutputIndex === -1) {
       continue;
@@ -209,7 +218,7 @@ export const renderViewModel = (viewModel: CommitViewModel): SVGSVGElement => {
   }
 
   // Draw | from *
-  if (historyItem.parentHashes.length > 0) {
+  if (historyItem.parentIds.length > 0) {
     const path = drawVerticalLine(
       SWIMLANE_WIDTH * (circleIndex + 1),
       SWIMLANE_HEIGHT / 2,
@@ -219,28 +228,51 @@ export const renderViewModel = (viewModel: CommitViewModel): SVGSVGElement => {
     svg.append(path);
   }
 
-  if (false) {
+  if (isCurrent) {
     // HEAD
-    const outerCircle = drawCircle(circleIndex, CIRCLE_RADIUS + 3, CIRCLE_STROKE_WIDTH, circleColor);
+    const outerCircle = drawCircle(
+      circleIndex,
+      CIRCLE_RADIUS + 3,
+      CIRCLE_STROKE_WIDTH,
+      circleColor
+    );
     svg.append(outerCircle);
 
-    const innerCircle = drawCircle(circleIndex, CIRCLE_STROKE_WIDTH, CIRCLE_RADIUS);
+    const innerCircle = drawCircle(
+      circleIndex,
+      CIRCLE_STROKE_WIDTH,
+      CIRCLE_RADIUS
+    );
     svg.append(innerCircle);
-} else {
-    if (historyItem.parentHashes.length > 1) {
-        // Multi-parent node
-        const circleOuter = drawCircle(circleIndex, CIRCLE_RADIUS + 2, CIRCLE_STROKE_WIDTH, circleColor);
-        svg.append(circleOuter);
+  } else {
+    if (historyItem.parentIds.length > 1) {
+      // Multi-parent node
+      const circleOuter = drawCircle(
+        circleIndex,
+        CIRCLE_RADIUS + 2,
+        CIRCLE_STROKE_WIDTH,
+        circleColor
+      );
+      svg.append(circleOuter);
 
-        const circleInner = drawCircle(circleIndex, CIRCLE_RADIUS - 1, CIRCLE_STROKE_WIDTH, circleColor);
-        svg.append(circleInner);
+      const circleInner = drawCircle(
+        circleIndex,
+        CIRCLE_RADIUS - 1,
+        CIRCLE_STROKE_WIDTH,
+        circleColor
+      );
+      svg.append(circleInner);
     } else {
-        // Node
-        const circle = drawCircle(circleIndex, CIRCLE_RADIUS + 1, CIRCLE_STROKE_WIDTH, circleColor);
-        svg.append(circle);
+      // Node
+      const circle = drawCircle(
+        circleIndex,
+        CIRCLE_RADIUS + 1,
+        CIRCLE_STROKE_WIDTH,
+        circleColor
+      );
+      svg.append(circle);
     }
-}
-
+  }
 
   return svg;
 };

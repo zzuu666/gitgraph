@@ -1,3 +1,14 @@
+export interface TopologyItem {
+    id: string;
+    parentIds: string[];
+}
+
+export interface TopologyViewModel {
+    item: TopologyItem;
+    inputSwimlanes: Swimlane[];
+    outputSwimlanes: Swimlane[];
+}
+
 export interface GitCommit {
   hash: string;
   parentHashes: string[];

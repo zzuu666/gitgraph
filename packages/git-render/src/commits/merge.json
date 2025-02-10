@@ -1,7 +1,7 @@
 [
   {
-    "hash": "7ccf2758ee217d984d559423723376b581b05f5e",
-    "parentHashes": [
+    "id": "7ccf2758ee217d984d559423723376b581b05f5e",
+    "parentIds": [
       "97d79b482e4897444699f424bf4b124524d7ea43",
       "077db44c90ac1f92933fc2866571d5016f313f6d"
     ],
@@ -15,8 +15,8 @@
     "body": ""
   },
   {
-    "hash": "077db44c90ac1f92933fc2866571d5016f313f6d",
-    "parentHashes": ["97d79b482e4897444699f424bf4b124524d7ea43"],
+    "id": "077db44c90ac1f92933fc2866571d5016f313f6d",
+    "parentIds": ["97d79b482e4897444699f424bf4b124524d7ea43"],
     "author": "Muffin",
     "authorEmail": "11661645+zzuu666@users.noreply.github.com",
     "authorDate": "2025-01-27 11:30:34 +0800",
@@ -27,8 +27,8 @@
     "body": ""
   },
   {
-    "hash": "97d79b482e4897444699f424bf4b124524d7ea43",
-    "parentHashes": [],
+    "id": "97d79b482e4897444699f424bf4b124524d7ea43",
+    "parentIds": [],
     "author": "Muffin",
     "authorEmail": "11661645+zzuu666@users.noreply.github.com",
     "authorDate": "2025-01-27 11:29:50 +0800",
